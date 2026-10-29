@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+<title>A Note for You</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=DM+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<style>
+/* Layout: one centered paper note over a sky that clears from drizzle to sunrise as the apology unfolds. */
+:root {
+  --ink: #30251f;
+  --muted: #76685f;
+  --paper: #fffaf0;
+  --line: #e5d8c5;
+  --accent: #9b5b4b;
+  --accent-soft: rgba(155, 91, 75, 0.22);
+  --accent-ink: #ffffff;
+  --sky-dusk-top: #27343f;
+  --sky-dusk-bot: #5b6d78;
+  --sky-morn-top: #6fa3b3;
+  --sky-morn-bot: #f0b979;
+  --glow: rgba(255, 205, 130, 0.8);
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hand: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+}
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--sky-dusk-top);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  padding-block: 20px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  overflow-x: hidden;
+}
+.sky, .sky-morn, .glow, .rainbow, #fx { position: fixed; inset: 0; pointer-events: none; }
+.sky { background: linear-gradient(180deg, var(--sky-dusk-top), var(--sky-dusk-bot)); }
+.sky-morn { background: linear-gradient(180deg, var(--sky-morn-top), var(--sky-morn-bot)); opacity: 0; transition: opacity 3s ease; }
+.glow { background: radial-gradient(65% 50% at 50% 100%, var(--glow), transparent 70%); opacity: 0; transition: opacity 3s ease; }
+.rainbow {
+  opacity: 0; transition: opacity 4s ease 1s;
+  background: radial-gradient(circle at 50% 118%, transparent 52%,
+    rgba(255,120,110,.22) 53%, rgba(255,190,100,.22) 56%, rgba(255,240,140,.2) 59%,
+    rgba(150,220,160,.2) 62%, rgba(130,190,240,.2) 65%, rgba(170,150,230,.18) 68%, transparent 70%);
+}
+#fx { width: 100%; height: 100%; }
+
+body.opening .note, body.opening .snd { visibility: hidden; }
+.door-intro {
+  position: fixed; inset: 0; z-index: 10; overflow: hidden;
+  display: grid; place-items: center; perspective: 1200px;
+  background: transparent;
+}
+.door-light {
+  position: absolute; inset: 0; opacity: .2;
+  background: radial-gradient(ellipse at center, rgba(255,244,204,.72), rgba(255,201,125,.2) 34%, transparent 68%);
+}
+.door {
+  position: absolute; top: 0; bottom: 0; width: 50.2%;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 15%, rgba(35,20,14,.18) 15.2% 15.6%, transparent 15.8% 31%),
+    linear-gradient(90deg, #43291f, #80553a 18%, #67432f 52%, #8c6040 86%, #38231c);
+  box-shadow: inset 0 0 0 10px rgba(32,20,16,.34), inset 0 0 35px rgba(20,12,10,.5);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+.door::before {
+  content: ""; position: absolute; inset: 12% 9%;
+  border: 2px solid rgba(226,190,143,.42);
+  box-shadow: 0 0 0 8px rgba(35,20,14,.16), 0 0 0 10px rgba(226,190,143,.18);
+}
+.door.left { left: 0; transform-origin: left center; }
+.door.right { right: 0; transform-origin: right center; }
+.door-intro.open { animation: door-scene-out .55s ease 3.65s forwards; }
+.door-intro.open .door { animation-duration: 3.4s; animation-timing-function: cubic-bezier(.2,.7,.2,1); animation-fill-mode: forwards; }
+.door-intro.open .door.left { animation-name: door-left-open; }
+.door-intro.open .door.right { animation-name: door-right-open; }
+.door-intro.open .door.right { animation-delay: .12s; }
+.door-intro.open .door-light { animation: door-light-up 2.8s ease-out both; }
+.door-intro.open.reduced-motion { animation-delay: 1.45s; }
+.door-intro.open.reduced-motion .door { animation-duration: 1.6s; }
+.door-intro.open.reduced-motion .door-light { animation-duration: 1.2s; }
+.door-open {
+  position: relative; z-index: 2; align-self: center; margin: auto;
+  padding: .9rem 1.6rem; border: 1px solid rgba(255,235,190,.85);
+  background: rgba(37,32,31,.82); color: #fff1d2;
+  box-shadow: 0 8px 26px rgba(20,12,10,.4), inset 0 0 0 1px rgba(255,255,255,.12);
+  letter-spacing: .03em;
+}
+.door-open:hover { background: rgba(58,43,35,.95); transform: translateY(-2px); }
+.door-intro.open .door-open { animation: prompt-out .35s ease forwards; pointer-events: none; }
+.door-handle {
+  position: absolute; top: 50%; width: 13px; height: 13px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff0bc, #be8846 60%, #694521);
+  box-shadow: 0 0 12px rgba(255,225,159,.6);
+}
+.door.left .door-handle { right: 9%; }
+.door.right .door-handle { left: 9%; }
+@keyframes door-left-open { from { transform: rotateY(0) translateZ(0); } to { transform: rotateY(-108deg) translateZ(-12px); } }
+@keyframes door-right-open { from { transform: rotateY(0) translateZ(0); } to { transform: rotateY(108deg) translateZ(-12px); } }
+@keyframes door-light-up { from { opacity: .2; transform: scale(.88); } to { opacity: 1; transform: scale(1.06); } }
+@keyframes door-scene-out { to { opacity: 0; visibility: hidden; } }
+@keyframes prompt-out { to { opacity: 0; transform: scale(.96); } }
+
+.note {
+  position: relative;
+  width: min(35rem, 100%);
+  max-height: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(145deg, #fffdf8, var(--paper) 62%, #f8f0e2);
+  border: 1px solid rgba(160, 119, 82, .24);
+  border-radius: 12px;
+  padding: clamp(1.3rem, 5vw, 2.3rem);
+  box-shadow: 0 1px 0 rgba(255,255,255,.85) inset, 0 0 0 5px rgba(255,250,240,.12), 0 24px 60px -20px rgba(10, 20, 28, .55);
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  min-width: 0;
+  min-height: 0;
+}
+#stage { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.scene { display: flex; flex-direction: column; gap: 1rem; min-width: 0; animation: page-in .38s ease both; }
+@keyframes page-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.99); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+
+.kicker { font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin: 0; }
+h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 8vw, 2.7rem);
+  line-height: 1.12;
+  margin: 0;
+  text-wrap: balance;
+  letter-spacing: -.01em;
+}
+p { margin: 0; max-width: 34em; text-wrap: pretty; }
+.lead { font-family: var(--font-display); font-size: 1.2rem; line-height: 1.55; }
+.w { display: inline-block; opacity: 0; animation: wordin .9s ease forwards; animation-delay: var(--d, 0s); white-space: pre; }
+@keyframes wordin { from { opacity: 0; transform: translateY(6px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+.later { opacity: 0; animation: wordin .9s ease forwards; animation-delay: var(--d, 1s); }
+
+/* Handwritten apology */
+.hand-wrap { display: inline-flex; flex-direction: column; align-self: flex-start; gap: .1rem; }
+.hand {
+  font-family: var(--font-hand); font-weight: 600; color: var(--accent);
+  font-size: clamp(3.4rem, 17vw, 5.6rem); line-height: 1; margin: 0;
+  clip-path: inset(-10% 100% -10% 0); animation: write 2.2s cubic-bezier(.5,.1,.3,1) .3s forwards;
+}
+@keyframes write { to { clip-path: inset(-10% -5% -10% 0); } }
+.scribble { width: 100%; height: 14px; overflow: visible; }
+.scribble path { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.2s ease 2.3s forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* Teardrop that falls and ripples */
+.tear { position: relative; height: 84px; width: 100%; }
+.drop-wrap { position: absolute; left: 14px; top: 0; animation: fall 4.2s cubic-bezier(.5,0,.9,.6) infinite; }
+.drop { width: 18px; height: 18px; background: #6c9fb3; border-radius: 0 50% 50% 50%; transform: rotate(45deg); }
+@keyframes fall { 0% { transform: translateY(-6px); opacity: 0; } 8% { opacity: 1; } 34% { transform: translateY(66px); opacity: 1; } 36% { opacity: 0; transform: translateY(66px); } 100% { opacity: 0; transform: translateY(66px); } }
+.ring { position: absolute; left: 2px; bottom: 6px; width: 46px; height: 13px; border: 1.5px solid #6c9fb3; border-radius: 50%; opacity: 0; transform: scale(.2); animation: ripple 4.2s ease-out infinite; }
+.ring.b { animation-delay: .3s; }
+.ring.c { animation-delay: .6s; }
+@keyframes ripple { 0%, 33% { opacity: 0; transform: scale(.2); } 35% { opacity: .9; transform: scale(.3); } 62% { opacity: 0; transform: scale(2.6); } 100% { opacity: 0; transform: scale(2.6); } }
+
+ul.points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .85rem; }
+ul.points li {
+  display: grid; grid-template-columns: 1.4rem 1fr; gap: .7rem; align-items: start;
+  padding-bottom: .85rem; border-bottom: 1px solid var(--line);
+  opacity: 0; animation: slidein .8s ease forwards; animation-delay: var(--d, 0s);
+}
+ul.points li:last-child { border-bottom: 0; padding-bottom: 0; }
+ul.points li::before { content: ""; width: .5rem; height: .5rem; margin-top: .55rem; justify-self: center; border-radius: 50%; background: var(--accent); }
+@keyframes slidein { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+ul.promise-points li { animation: promise-highlight 1.2s ease forwards; animation-delay: var(--d, 0s); }
+@keyframes promise-highlight {
+  0% { opacity: 0; transform: translateX(-12px); }
+  40% { opacity: 1; transform: none; background: var(--accent-soft); box-shadow: 0 0 14px rgba(155,91,75,.18); }
+  100% { opacity: 1; transform: none; background: transparent; box-shadow: none; }
+}
+.sign { font-family: var(--font-hand); font-size: 2rem; line-height: 1; color: var(--accent); margin-top: .2rem; }
+
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; flex: 0 0 auto; }
+.dots { display: flex; gap: .45rem; }
+.dots span { width: .5rem; height: .5rem; border-radius: 50%; background: var(--line); transition: background .4s, transform .4s; }
+.dots span.on { background: var(--accent); transform: scale(1.3); }
+.actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+button {
+  font: inherit; font-weight: 600; font-size: .98rem; cursor: pointer;
+  border-radius: 999px; padding: .7rem 1.35rem; border: 1.5px solid var(--ink);
+  background: transparent; color: var(--ink);
+  transition: transform .15s ease, background .2s, color .2s;
+}
+button:hover { transform: translateY(-1px); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button.ghost { border-color: transparent; color: var(--muted); padding-inline: .8rem; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+button[hidden] { display: none; }
+.choices { display: flex; flex-direction: column; gap: .6rem; }
+.choices button { text-align: left; border-radius: 10px; }
+.reply { border-left: 3px solid var(--accent); padding: .2rem 0 .2rem 1rem; font-family: var(--font-display); font-size: 1.12rem; animation: rise .7s both; }
+
+/* Hold to promise */
+.hold {
+  position: relative; overflow: hidden; align-self: stretch; padding: .95rem 1.2rem;
+  border-color: var(--accent); color: var(--ink); text-align: center;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.hold:hover { transform: none; }
+.hold-fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent-soft); }
+.hold-label { position: relative; }
+.hint { font-size: .85rem; color: var(--muted); text-align: center; margin: 0 auto; }
+.hold.done { background: var(--accent); color: var(--accent-ink); }
+
+/* Sound toggle */
+.snd {
+  position: fixed; z-index: 6; width: 42px; height: 42px; padding: 0; display: grid; place-items: center;
+  top: calc(env(safe-area-inset-top, 0px) + 12px); right: max(12px, env(safe-area-inset-right, 0px));
+  border-radius: 50%; border: 0; background: var(--paper); color: var(--ink);
+  box-shadow: 0 6px 18px -6px rgba(10, 20, 28, .5);
+}
+.snd svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.snd .waves { display: none; }
+.snd.on .waves { display: inline; }
+.snd.on .slash { display: none; }
+
+/* The shy "I will think about it" choice and the calm ending */
+.choices { position: relative; display: block; height: 10.5rem; }
+.choices button[data-r="time"] { position: absolute; left: 0; top: 0; z-index: 2; transition: left .5s cubic-bezier(.3,1.5,.5,1), top .5s cubic-bezier(.3,1.5,.5,1), transform .15s; }
+.choices button[data-r="talk"] { position: absolute; left: 0; right: 0; bottom: 0; }
+.choices button.tame { animation: wobble .9s ease 2; border-color: var(--accent); }
+@keyframes wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-4deg) scale(1.05); } 75% { transform: rotate(4deg) scale(1.05); } }
+#dodgeMsg { min-height: 1.4em; font-family: var(--font-hand); font-size: 1.35rem; color: var(--accent); }
+.breathe { position: relative; width: 132px; height: 132px; margin: .2rem auto; display: grid; place-items: center; }
+.breathe .gr { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, rgba(255,215,150,.85), rgba(255,190,110,.2) 62%, transparent 70%); animation: breathe 8s ease-in-out infinite; }
+.breathe .gr.r2 { inset: 16%; animation-delay: .5s; }
+.breathe .gr.r3 { inset: 32%; animation-delay: 1s; }
+@keyframes breathe { 0%, 100% { transform: scale(.55); opacity: .55; } 50% { transform: scale(1); opacity: 1; } }
+.bt { position: absolute; font-family: var(--font-hand); font-size: 1.35rem; color: var(--ink); opacity: 0; animation: bt 8s ease-in-out infinite; }
+.bt.out { animation-delay: 4s; }
+@keyframes bt { 0% { opacity: 0; } 12%, 40% { opacity: 1; } 52%, 100% { opacity: 0; } }
+
+/* Finale after "Please forgive me" */
+.choices.out { animation: fadeout .5s ease forwards; pointer-events: none; }
+@keyframes fadeout { to { opacity: 0; transform: translateY(-6px); } }
+.finale { display: flex; flex-direction: column; gap: 1rem; border-top: 1px solid var(--line); padding-top: 1.2rem; animation: rise .8s both; }
+.finale .hand { font-size: clamp(2.5rem, 12vw, 3.7rem); line-height: 1.05; animation-duration: 2.8s; }
+.finale .scribble path { animation-delay: 3s; }
+.choices[hidden] { display: none; }
+.lanterns { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.lantern { position: absolute; bottom: -120px; left: var(--x); width: var(--s); opacity: 0; animation: lift var(--t) ease-in var(--d) forwards; }
+.lantern .body {
+  display: block; width: 100%; height: calc(var(--s) * 1.25); position: relative; transform-origin: 50% 0;
+  border-radius: 16% 16% 22% 22% / 12% 12% 26% 26%;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 22%, rgba(190,80,30,.18) 22% 24%), linear-gradient(180deg, #ffd991, #ff9f50 70%, #f27b3a);
+  box-shadow: 0 0 30px 10px rgba(255, 170, 80, .55), inset 0 -12px 18px rgba(255, 245, 200, .75);
+  animation: sway 3.2s ease-in-out var(--d) infinite alternate;
+}
+.lantern .body::before, .lantern .body::after { content: ""; position: absolute; left: 12%; right: 12%; height: 6%; background: #8a4a2a; border-radius: 2px; }
+.lantern .body::before { top: -2%; }
+.lantern .body::after { bottom: -2%; }
+@keyframes lift { 0% { transform: translateY(0); opacity: 0; } 12% { opacity: 1; } 80% { opacity: .95; } 100% { transform: translateY(-125vh); opacity: 0; } }
+@keyframes sway { from { transform: rotate(-5deg) translateX(-8px); } to { transform: rotate(5deg) translateX(8px); } }
+.flash { position: fixed; inset: 0; pointer-events: none; z-index: 4; background: radial-gradient(circle at 50% 55%, rgba(255,240,200,.95), rgba(255,220,150,0) 65%); opacity: 0; }
+.flash.go { animation: flash 2s ease-out forwards; }
+@keyframes flash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lanterns, .flash { display: none; }
+  .choices button[data-r="time"] { transition: none; }
+  .choices button.tame { animation: none; }
+  .breathe .gr { animation: none; }
+  .bt { animation: none; opacity: 1; }
+  .bt.out { display: none; }
+  .finale { animation: none; }
+  .choices.out { animation: none; opacity: 0; }
+  .scene, .reply { animation: none; }
+  .w, .later, ul.points li { opacity: 1; animation: none; }
+  .hand { clip-path: none; animation: none; }
+  .scribble path { stroke-dashoffset: 0; animation: none; }
+  .drop-wrap { animation: none; opacity: 0; }
+  .ring { animation: none; opacity: .7; transform: scale(1.6); }
+  .sky-morn, .glow, .rainbow { transition: none; }
+  button { transition: none; }
+}
+</style>
+
+</head>
+<body class="opening">
+<div class="door-intro" id="doorIntro" aria-label="Apology letter entrance">
+  <div class="door-light"></div>
+  <div class="door left"><span class="door-handle"></span></div>
+  <div class="door right"><span class="door-handle"></span></div>
+  <button class="door-open" id="doorOpen" type="button">Open your apology letter</button>
+</div>
+<div class="sky" aria-hidden="true"></div>
+<div class="sky-morn" id="morn" aria-hidden="true"></div>
+<div class="glow" id="glow" aria-hidden="true"></div>
+<div class="rainbow" id="rainbow" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="flash" id="flash" aria-hidden="true"></div>
+<div class="lanterns" id="lanterns" aria-hidden="true"></div>
+
+<main class="note" id="note">
+  <div id="stage" aria-live="polite"></div>
+  <div class="nav">
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="actions">
+      <button class="ghost" id="back" hidden>Back</button>
+      <button class="primary" id="next">Continue</button>
+    </div>
+  </div>
+</main>
+<button class="snd" id="snd" type="button" aria-label="Turn sound on" aria-pressed="false">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><g class="waves"><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></g><path class="slash" d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+</button>
+
+<script>
+/* ---- Edit these before sending ---- */
+const CONFIG = {
+  to: "Bhagya",      // her name. Leave empty to say just "Hi dear friend."
+  from: "Your friend, Nirikshith",   // how the note is signed. Leave empty to sign off as "Your friend".
+  wrong: [
+    "I said things without thinking about how they would land.",
+    "I tried to explain myself before I understood how you felt."
+  ],
+  memories: [
+    "The times you listened when I was a mess and never made me feel small.",
+    "Every time you showed up without being asked."
+  ],
+  promise: [
+    "Listen first, and talk after.",
+    "Think before I joke or react.",
+    "Tell you straight when I am wrong, with no excuses."
+  ]
+};
+/* ----------------------------------- */
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const to = CONFIG.to.trim();
+const from = CONFIG.from.trim() || "Your friend";
+const list = (a, start, className = "") => '<ul class="points ' + className + '">' + a.map((t, k) => '<li style="--d:' + (start + k * 0.7).toFixed(2) + 's"><span>' + esc(t) + "</span></li>").join("") + "</ul>";
+/* Words that fade in one after another */
+const words = (text, start) => '<p class="lead">' + text.split(" ").map((w, k) => '<span class="w" style="--d:' + (start + k * 0.07).toFixed(2) + 's">' + esc(w) + " </span>").join("") + "</p>";
+
+const scenes = [
+  { rain: 0.9, fire: 0, html:
+    '<p class="kicker">A note for you</p><h1>Hi dear friend' + (to ? ", " + esc(to) : "") + '.</h1>' +
+    words("I made this for you. Read it at your own pace.", 0.5) +
+    '<p class="later" style="--d:2.6s">You do not have to reply to any of it.</p>',
+    next: "Read it" },
+  { rain: 0.8, fire: 0, html:
+    '<p class="kicker">First of all</p>' +
+    '<div class="hand-wrap"><p class="hand">I am sorry.</p><svg class="scribble" viewBox="0 0 320 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9 C 60 2, 120 13, 200 6 S 295 4, 317 9"/></svg></div>' +
+    words("I hurt you and I made you cry. I keep thinking about that. It was my fault, and it was never yours.", 2.6) },
+  { rain: 0.7, fire: 0, html:
+    '<p class="kicker">What I keep thinking about</p>' +
+    '<div class="tear" aria-hidden="true"><span class="ring"></span><span class="ring b"></span><span class="ring c"></span><span class="drop-wrap"><span class="drop" style="display:block"></span></span></div>' +
+    '<h1>You did not deserve that.</h1>' +
+    words("You deserved patience and a proper apology, and I gave you neither. I am sorry for that.", 0.9) },
+  { rain: 0.5, fire: 0, html:
+    '<p class="kicker">What I got wrong</p><h1>I understand it now.</h1>' + list(CONFIG.wrong, 0.6) },
+  { rain: 0.25, fire: 0.45, html:
+    '<p class="kicker">What you mean to me</p><h1>You are one of my people.</h1>' +
+    words("These are the things I should have thought about before I ever raised my voice.", 0.5) + list(CONFIG.memories, 2.2) },
+  { rain: 0.08, fire: 0.75, promise: true, html:
+    '<p class="kicker">My promise</p><h1>I will do better.</h1>' + list(CONFIG.promise, 0.5, "promise-points") +
+    '<button class="hold" id="hold" type="button"><span class="hold-fill" id="fill"></span><span class="hold-label" id="holdLabel">Hold to promise</span></button>' +
+    '<p class="hint" id="hint">Press and hold the button until it fills.</p>' },
+  { rain: 0, fire: 1, final: true, html:
+    '<p class="kicker">One last thing</p><h1>Thank you for reading.</h1>' +
+    words("I care deeply about our friendship, and I will keep working to be a better friend.", 0.5) +
+    '<div class="sign later" style="--d:2.4s">' + esc(from) + '</div>' +
+    '<p class="hint later" style="--d:2.7s">Whatever you decide, I will respect it.</p>' +
+    '<div class="choices later" style="--d:2.9s" id="choices">' +
+      '<button data-r="time">I will think about it</button>' +
+      '<button data-r="talk">I hope you can forgive me</button>' +
+    '</div><p class="hint" id="dodgeMsg" aria-live="polite"></p><div id="reply"></div>' }
+];
+
+const $ = id => document.getElementById(id);
+const stage = $("stage"), next = $("next"), back = $("back"), dots = $("dots");
+dots.innerHTML = scenes.map(() => "<span></span>").join("");
+let i = 0, advancing = false;
+
+function show(n) {
+  i = n; advancing = false;
+  const s = scenes[i];
+  stage.innerHTML = '<div class="scene">' + s.html + "</div>";
+  stage.scrollTop = 0;
+  [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i));
+  back.hidden = i === 0;
+  next.hidden = !!(s.final || s.promise);
+  next.textContent = s.next || "Continue";
+  const p = i / (scenes.length - 1);
+  $("morn").style.opacity = p;
+  $("glow").style.opacity = Math.max(0, p - 0.3) / 0.7;
+  $("rainbow").style.opacity = s.final ? 1 : 0;
+  target.rain = s.rain; target.fire = s.fire;
+  startFx();
+  audio.scene(n, s.rain);
+  if (s.promise) setupHold();
+  if (s.final) setupChoices();
+}
+next.addEventListener("click", () => {
+  if (i === 0 && !audio.userOff()) audio.start();
+  if (i < scenes.length - 1) show(i + 1);
+});
+back.addEventListener("click", () => i > 0 && show(i - 1));
+
+/* Finale: thank-you message, lanterns rising, light bursts */
+/* Sound: everything is generated in the browser, no audio files */
+const audio = (() => {
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  const CHORDS = [[45, 57, 60, 64], [45, 57, 60, 64], [50, 57, 62, 65], [41, 57, 60, 65], [48, 55, 64, 67], [43, 55, 62, 67], [48, 55, 64, 67, 72]];
+  const MINOR = [69, 72, 74, 76, 79, 81], MAJOR = [72, 74, 76, 79, 81, 84];
+  let ctx = null, master, rainG, padBus, delay, pad = [], timer = null, on = false, userOff = false;
+  let scene = 0, rainLevel = 0.9, lastNote = 0, holdOsc = null, holdG = null;
+  const listeners = [];
+  const emit = () => listeners.forEach(f => f(on));
+
+  function ensure() {
+    if (ctx) return true;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    delay = ctx.createDelay(1); delay.delayTime.value = 0.42;
+    const fb = ctx.createGain(); fb.gain.value = 0.36;
+    const eo = ctx.createGain(); eo.gain.value = 0.45;
+    delay.connect(fb); fb.connect(delay); delay.connect(eo); eo.connect(master);
+    padBus = ctx.createGain(); padBus.gain.value = 1;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1000;
+    padBus.connect(lp); lp.connect(master);
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = buf.getChannelData(0);
+    for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1500; bp.Q.value = 0.5;
+    rainG = ctx.createGain(); rainG.gain.value = 0;
+    src.connect(bp); bp.connect(rainG); rainG.connect(master); src.start();
+    return true;
+  }
+  function pluck(m, vel, dur) {
+    if (!ctx || !on) return;
+    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "triangle"; o.frequency.value = hz(m);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 2.6));
+    o.connect(g); g.connect(master); g.connect(delay);
+    o.start(t); o.stop(t + (dur || 2.6) + 0.1);
+  }
+  function setChord(notes) {
+    const t = ctx.currentTime;
+    pad.forEach(p => { p.g.gain.setTargetAtTime(0, t, 1.2); p.o.stop(t + 6); });
+    pad = notes.map((m, k) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = k === 0 ? "sine" : "triangle"; o.frequency.value = hz(m); o.detune.value = (k % 2 ? 4 : -4);
+      g.gain.value = 0; g.gain.setTargetAtTime(k === 0 ? 0.07 : 0.035, t, 1.6);
+      o.connect(g); g.connect(padBus); o.start(t);
+      return { o, g };
+    });
+  }
+  function applyScene() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    rainG.gain.setTargetAtTime(rainLevel * 0.1, t, 1.5);
+    setChord(CHORDS[Math.min(scene, CHORDS.length - 1)]);
+  }
+  function step() {
+    if (Math.random() > 0.7) return;
+    const sc = scene >= 4 ? MAJOR : MINOR;
+    let m = sc[Math.floor(Math.random() * sc.length)];
+    if (m === lastNote) m = sc[(sc.indexOf(m) + 2) % sc.length];
+    lastNote = m;
+    pluck(m, 0.07, 2.8);
+  }
+  function start() {
+    if (userOff || !ensure()) return;
+    ctx.resume();
+    on = true;
+    master.gain.setTargetAtTime(0.4, ctx.currentTime, 0.8);
+    applyScene();
+    if (!timer) timer = setInterval(step, 1700);
+    emit();
+  }
+  function stop() {
+    on = false;
+    if (timer) { clearInterval(timer); timer = null; }
+    if (ctx) { master.gain.setTargetAtTime(0, ctx.currentTime, 0.25); setTimeout(() => { if (!on) ctx.suspend(); }, 900); }
+    emit();
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!ctx || !on) return;
+    if (document.hidden) ctx.suspend(); else ctx.resume();
+  });
+  return {
+    start,
+    userOff: () => userOff,
+    toggle() { if (on) { userOff = true; stop(); } else { userOff = false; start(); } },
+    scene(n, rain) { scene = n; rainLevel = rain; if (on) applyScene(); },
+    blip(k) { pluck(88 - k * 5, 0.09, 0.9); },
+    chime() { [72, 76, 79, 84, 88].forEach((m, k) => setTimeout(() => pluck(m, 0.11, 3), k * 150)); },
+    bell() { pluck(76, 0.1, 4); setTimeout(() => pluck(83, 0.07, 4), 600); },
+    holdStart() {
+      if (!on || holdOsc) return;
+      holdOsc = ctx.createOscillator(); holdG = ctx.createGain();
+      holdOsc.type = "sine"; holdOsc.frequency.value = 220; holdG.gain.value = 0;
+      holdG.gain.setTargetAtTime(0.05, ctx.currentTime, 0.1);
+      holdOsc.connect(holdG); holdG.connect(master); holdOsc.start();
+    },
+    holdSet(v) { if (holdOsc) holdOsc.frequency.setTargetAtTime(220 + v * 360, ctx.currentTime, 0.05); },
+    holdEnd() {
+      if (!holdOsc) return;
+      const o = holdOsc, g = holdG; holdOsc = null; holdG = null;
+      g.gain.setTargetAtTime(0, ctx.currentTime, 0.08); o.stop(ctx.currentTime + 0.5);
+    },
+    onchange(f) { listeners.push(f); }
+  };
+})();
+const sndBtn = document.getElementById("snd");
+audio.onchange(isOn => {
+  sndBtn.classList.toggle("on", isOn);
+  sndBtn.setAttribute("aria-pressed", String(isOn));
+  sndBtn.setAttribute("aria-label", isOn ? "Turn sound off" : "Turn sound on");
+});
+sndBtn.addEventListener("click", () => audio.toggle());
+
+/* "I will think about it" slips away three times, then lets itself be pressed */
+function setupChoices() {
+  const ch = $("choices"), tb = ch.querySelector('[data-r="time"]'), msg = $("dodgeMsg");
+  const lines = ["Oops, that button is shy.", "It slipped away again.", "Okay, last one. It is yours now, press it if you need to."];
+  let dodges = 0, cx = 0, cy = 0;
+  const dodge = () => {
+    dodges++;
+    const maxX = Math.max(0, ch.clientWidth - tb.offsetWidth);
+    const maxY = Math.max(0, ch.clientHeight - tb.offsetHeight * 2 - 14);
+    let x = 0, y = 0;
+    for (let k = 0; k < 8; k++) {
+      x = Math.random() * maxX; y = Math.random() * maxY;
+      if (Math.abs(x - cx) > maxX * 0.35 || Math.abs(y - cy) > maxY * 0.4) break;
+    }
+    cx = x; cy = y;
+    tb.style.left = x + "px"; tb.style.top = y + "px";
+    msg.textContent = lines[dodges - 1];
+    audio.blip(dodges);
+    if (dodges >= 3) tb.classList.add("tame");
+  };
+  tb.addEventListener("pointerenter", e => { if (dodges < 3 && e.pointerType === "mouse") dodge(); });
+  tb.addEventListener("pointerdown", e => { if (dodges < 3 && e.pointerType !== "mouse") { e.preventDefault(); dodge(); } });
+  ch.addEventListener("click", e => {
+    const b = e.target.closest("button[data-r]");
+    if (!b) return;
+    if (b.dataset.r === "talk") { finale(); return; }
+    if (dodges < 3) { if (e.detail === 0) dodge(); return; }
+    calm();
+  });
+}
+
+/* Calm ending: a slow breathing glow and a single lantern */
+function calm() {
+  audio.bell();
+  const ch = $("choices");
+  ch.classList.add("out");
+  setTimeout(() => { ch.hidden = true; }, 500);
+  $("dodgeMsg").textContent = "";
+  $("reply").innerHTML =
+    '<div class="finale">' +
+      '<div class="breathe" aria-hidden="true"><span class="gr"></span><span class="gr r2"></span><span class="gr r3"></span><span class="bt">breathe in</span><span class="bt out">breathe out</span></div>' +
+      '<div class="hand-wrap"><p class="hand">Take your time.</p>' +
+      '<svg class="scribble" viewBox="0 0 320 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9 C 60 2, 120 13, 200 6 S 295 4, 317 9"/></svg></div>' +
+      words("I will be right here, and I will not rush you. Whenever you feel ready, I will be glad.", 2.8) +
+    "</div>";
+  setTimeout(() => $("reply").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }), 250);
+  if (reduce) return;
+  burst(W / 2, H * 0.55, 24);
+  const box = $("lanterns");
+  box.innerHTML = '<span class="lantern" style="--x:46%;--s:64px;--t:14s;--d:0.6s"><span class="body"></span></span>';
+  setTimeout(() => { box.innerHTML = ""; }, 16000);
+}
+
+function finale() {
+  audio.chime();
+  const ch = $("choices");
+  $("dodgeMsg").textContent = "";
+  ch.classList.add("out");
+  setTimeout(() => { ch.hidden = true; }, 500);
+  $("reply").innerHTML =
+    '<div class="finale">' +
+      '<div class="hand-wrap"><p class="hand">Thank you for tolerating me.</p>' +
+      '<svg class="scribble" viewBox="0 0 320 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9 C 60 2, 120 13, 200 6 S 295 4, 317 9"/></svg></div>' +
+      '<p class="lead">Hi ' + (to ? esc(to) : "dear friend") + ', I am sorry for hurting you. I never meant to hurt you.</p>' +
+      '<p class="lead">I am always like this. I joke around and try to keep the people around me happy, and sometimes I do not think about how a joke might hurt someone’s feelings.</p>' +
+      '<p class="lead">Please do not think that you are the problem. I am always happy to sit beside you. The day we were moved to the floor and the seating was rearranged, I was actually happy about it. I only said that I did not like sitting beside you as a joke, and I should not have said it.</p>' +
+      '<p class="lead">One last thing. I am always happy to help you, and from now on I will think before I speak.</p>' +
+      words("For every time you put up with me, and for staying my friend even when I did not make it easy. I am so lucky to have a friend like you.", 3.3) +
+    "</div>";
+  setTimeout(() => $("reply").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }), 250);
+  if (reduce) return;
+  const fl = $("flash"); fl.classList.remove("go"); void fl.offsetWidth; fl.classList.add("go");
+  burst(W / 2, H * 0.55, 80);
+  setTimeout(() => burst(W * 0.2, H * 0.5, 45), 450);
+  setTimeout(() => burst(W * 0.8, H * 0.45, 45), 800);
+  const box = $("lanterns"); box.innerHTML = "";
+  const N = 16;
+  for (let k = 0; k < N; k++) {
+    const s = 34 + Math.random() * 34;
+    box.insertAdjacentHTML("beforeend",
+      '<span class="lantern" style="--x:' + (k % 4 === 3 ? 20 + Math.random() * 55 : k % 2 ? 84 + Math.random() * 12 : 1 + Math.random() * 14).toFixed(1) + '%;--s:' + s.toFixed(0) + 'px;--t:' + (7 + Math.random() * 5).toFixed(1) + 's;--d:' + (Math.random() * 3.4).toFixed(2) + 's"><span class="body"></span></span>');
+  }
+  setTimeout(() => { box.innerHTML = ""; }, 17000);
+}
+
+/* Hold to promise */
+function setupHold() {
+  const btn = $("hold"), fill = $("fill"), label = $("holdLabel");
+  const HOLD_MS = 1600, DRAIN_MS = 700;
+  let v = 0, holding = false, last = 0, raf = 0, done = false;
+  const tick = t => {
+    const dt = last ? t - last : 16; last = t;
+    v = Math.max(0, Math.min(1, v + (holding ? dt / HOLD_MS : -dt / DRAIN_MS)));
+    fill.style.width = (v * 100) + "%";
+    audio.holdSet(v);
+    if (v >= 1 && !done) {
+      done = true; holding = false;
+      audio.holdEnd(); audio.chime();
+      btn.classList.add("done"); label.textContent = "Promised"; $("hint").textContent = "I mean every word.";
+      const r = btn.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, 60);
+      setTimeout(() => { if (i === scenes.length - 2 && !advancing) { advancing = true; show(i + 1); } }, 1500);
+      return;
+    }
+    if (holding || v > 0) raf = requestAnimationFrame(tick); else { raf = 0; last = 0; }
+  };
+  const press = () => { if (done) return; holding = true; audio.holdStart(); if (!raf) { last = 0; raf = requestAnimationFrame(tick); } };
+  const release = () => { holding = false; audio.holdEnd(); };
+  btn.addEventListener("pointerdown", e => { e.preventDefault(); press(); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(ev => btn.addEventListener(ev, release));
+  btn.addEventListener("contextmenu", e => e.preventDefault());
+  btn.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) { e.preventDefault(); press(); } });
+  btn.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") release(); });
+  btn.addEventListener("blur", release);
+}
+
+/* Canvas: rain, ripples, drifting lights and sparkle bursts */
+const cv = $("fx"), ctx = cv.getContext("2d");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const RAIN_MAX = 150, LIGHT_MAX = 46;
+let W = 0, H = 0, drops = [], lights = [], ripples = [], sparks = [], running = false, lastT = 0;
+const level = { rain: scenes[0].rain, fire: 0 };
+const target = { rain: scenes[0].rain, fire: 0 };
+
+function size() {
+  const d = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W * d; cv.height = H * d;
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+}
+function seed() {
+  drops = Array.from({ length: RAIN_MAX }, () => ({ x: Math.random() * W, y: Math.random() * H, l: 10 + Math.random() * 16, v: 6 + Math.random() * 6, a: 0.25 + Math.random() * 0.35 }));
+  lights = Array.from({ length: LIGHT_MAX }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .25, vy: -0.1 - Math.random() * .25, ph: Math.random() * 6.28, r: 2 + Math.random() * 3 }));
+}
+function burst(x, y, n) {
+  if (reduce) return;
+  for (let k = 0; k < n; k++) {
+    const a = Math.random() * 6.283, sp = 1.5 + Math.random() * 4.5;
+    sparks.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.2, life: 1, r: 1.5 + Math.random() * 2.5 });
+  }
+  startFx();
+}
+function glowDot(x, y, r, a) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r * 4);
+  g.addColorStop(0, "rgba(255,250,225," + a + ")");
+  g.addColorStop(0.35, "rgba(255,225,150," + a * 0.45 + ")");
+  g.addColorStop(1, "rgba(255,220,140,0)");
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(x, y, r * 4, 0, 6.283); ctx.fill();
+}
+function frame(t) {
+  const dt = Math.min(48, lastT ? t - lastT : 16); lastT = t;
+  level.rain += (target.rain - level.rain) * 0.02;
+  level.fire += (target.fire - level.fire) * 0.015;
+  ctx.clearRect(0, 0, W, H);
+
+  const n = Math.round(RAIN_MAX * level.rain);
+  ctx.lineWidth = 1;
+  for (let k = 0; k < n; k++) {
+    const d = drops[k];
+    ctx.strokeStyle = "rgba(200,216,226," + d.a + ")";
+    ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - 2, d.y + d.l); ctx.stroke();
+    d.y += d.v; d.x -= 0.3;
+    if (d.y > H) {
+      if (Math.random() < 0.3 && ripples.length < 30) ripples.push({ x: d.x, y: H - 6 - Math.random() * 40, r: 1 });
+      d.y = -d.l; d.x = Math.random() * W;
+    }
+  }
+  for (let k = ripples.length - 1; k >= 0; k--) {
+    const r = ripples[k]; r.r += 0.5;
+    const a = 1 - r.r / 36;
+    if (a <= 0) { ripples.splice(k, 1); continue; }
+    ctx.strokeStyle = "rgba(210,225,235," + (a * 0.5) + ")";
+    ctx.beginPath(); ctx.ellipse(r.x, r.y, r.r, r.r * 0.3, 0, 0, 6.283); ctx.stroke();
+  }
+
+  const m = Math.round(LIGHT_MAX * level.fire);
+  for (let k = 0; k < m; k++) {
+    const L = lights[k];
+    L.x += L.vx + Math.sin(t / 1200 + L.ph) * 0.2; L.y += L.vy;
+    if (L.y < -20) { L.y = H + 20; L.x = Math.random() * W; }
+    if (L.x < -20) L.x = W + 20; else if (L.x > W + 20) L.x = -20;
+    glowDot(L.x, L.y, L.r, 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t / 700 + L.ph)));
+  }
+  for (let k = sparks.length - 1; k >= 0; k--) {
+    const s = sparks[k];
+    s.x += s.vx; s.y += s.vy; s.vx *= 0.97; s.vy = s.vy * 0.97 + 0.04; s.life -= dt / 1400;
+    if (s.life <= 0) { sparks.splice(k, 1); continue; }
+    glowDot(s.x, s.y, s.r, Math.max(0, s.life));
+  }
+  if (level.rain > 0.01 || target.rain > 0 || level.fire > 0.01 || target.fire > 0 || ripples.length || sparks.length) requestAnimationFrame(frame);
+  else { running = false; lastT = 0; ctx.clearRect(0, 0, W, H); }
+}
+function startFx() {
+  if (reduce || running) return;
+  running = true; requestAnimationFrame(frame);
+}
+size(); seed();
+addEventListener("resize", () => { size(); seed(); });
+show(0);
+const doorIntro = $("doorIntro");
+const doorOpen = $("doorOpen");
+doorOpen.addEventListener("click", () => {
+  doorOpen.disabled = true;
+  if (reduce) doorIntro.classList.add("reduced-motion");
+  doorIntro.classList.add("open");
+  setTimeout(() => {
+    document.body.classList.remove("opening");
+    doorIntro.remove();
+  }, reduce ? 2200 : 4300);
+});
+</script>
+
+</body>
+</html>
